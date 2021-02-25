@@ -1,9 +1,9 @@
 # SYSC-4005-Project
 
-Members: 
-Julian Mendoza
-Hamna Nimra
-Colin Wallace
+### Members: 
+Julian Mendoza,
+Hamna Nimra,
+Colin Wallace.
 
 ## System Description
 A manufacturing facility assembles three different types of products, named P1,
