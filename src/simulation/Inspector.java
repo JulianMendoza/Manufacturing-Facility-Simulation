@@ -1,17 +1,15 @@
-import java.util.Random;
+package simulation;
 
 public class Inspector {
 
-    public enum componentType {C1, C2, C3}
+    public enum COMPONENT_TYPE {C1, C2, C3}
 
     private int id;
-    private componentType component;
+    private COMPONENT_TYPE component;
     private boolean isBlocked = false;
-    private Random random = new Random();
 
     public Inspector(int id){
         this.id = id;
-        this.isBlocked = isBlocked;
     }
 
     public int getId() {
@@ -22,11 +20,11 @@ public class Inspector {
         this.id = id;
     }
 
-    public componentType getComponent() {
+    public COMPONENT_TYPE getComponent() {
         return component;
     }
 
-    public void setComponent(componentType component) {
+    public void setComponent(COMPONENT_TYPE component) {
         this.component = component;
     }
 

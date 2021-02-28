@@ -1,12 +1,12 @@
-public class Workstation {
+package simulation;
+
+public class WorkStation {
 
     private int id;
     private boolean bufferAvailable;
-    private Inspector.componentType component;
-    public Workstation(int id) {
+    public WorkStation(int id) {
         this.id = id;
         this.bufferAvailable = true;
-
     }
 
     public void setId(int id) {
@@ -21,8 +21,8 @@ public class Workstation {
         return bufferAvailable;
     }
 
-    public void setBufferAvailable(){
-        bufferAvailable = true;
+    public void setBufferAvailable(boolean available){
+        bufferAvailable = available;
     }
 
 
