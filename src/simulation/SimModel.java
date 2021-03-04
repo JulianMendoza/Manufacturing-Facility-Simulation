@@ -3,7 +3,6 @@ package simulation;
 import java.util.*;
 
 public class SimModel {
-    private static final String[] FILEPATHS=new String[]{"data/servinps1.dat","data/servinps22.dat","data/servinps23.dat","data/ws1.dat","data/ws2.dat","data/ws3.dat"};
     private double clock,lifeCycle;
     private Random random = new Random();
     private Queue<SimEvent> FEL;
