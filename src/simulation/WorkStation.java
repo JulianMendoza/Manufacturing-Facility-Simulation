@@ -3,10 +3,14 @@ package simulation;
 public class WorkStation {
 
     private int id;
-    private boolean bufferAvailable;
-    public WorkStation(int id) {
+    private boolean[] buffers;
+    private boolean busy;
+    private double sampleMean;
+    public WorkStation(int id,double mean) {
         this.id = id;
-        this.bufferAvailable = true;
+        this.sampleMean=mean;
+        buffers= new boolean[] {true,true,true};
+        this.busy=false;
     }
 
     public void setId(int id) {
@@ -17,12 +21,17 @@ public class WorkStation {
         return id;
     }
 
-    public boolean bufferAvailable(){
-        return bufferAvailable;
+    public boolean bufferAvailable(int buffer){
+        return buffers[buffer];
     }
-
-    public void setBufferAvailable(boolean available){
-        bufferAvailable = available;
+    public void setBufferAvailable(int buffer, boolean available){
+        buffers[buffer]=available;
+    }
+    public void setBusy(boolean busy){
+        this.busy=busy;
+    }
+    public boolean isBusy(){
+        return this.busy;
     }
 
 

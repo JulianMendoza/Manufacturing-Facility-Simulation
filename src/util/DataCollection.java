@@ -53,10 +53,13 @@ public class DataCollection {
            for(int k=1;k<=binSize;k++){
                int count=0;
                for(double d:map.get(i)){
-                   //add one to last bin
                    if(d<(frequency*k)&&d>=frequency*(k-1)){
                        count++;
                    }
+               }
+               //last input
+               if(k==binSize){
+                   count++;
                }
                stats.put("bin"+k,count);
            }
