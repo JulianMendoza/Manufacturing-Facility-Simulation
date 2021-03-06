@@ -14,7 +14,7 @@ public class SimEvent implements Comparable<SimEvent>{
         }
     }
 
-    public enum EVENT {I1, I2, W1, W2, W3};
+    public enum EVENT {I1, I2, W1,W2,W3};
     private Object entity;
     private EVENT type;
     private double serviceTime;
@@ -34,11 +34,11 @@ public class SimEvent implements Comparable<SimEvent>{
             }
             component=i.getComponent();
             if(component.equals(Inspector.COMPONENT_TYPE.C1)||component.equals(Inspector.COMPONENT_TYPE.C2)){
-                this.serviceTime=clock+i.getSampleMean()*-Math.log(-x+1);
+                this.serviceTime=clock+(i.getSampleMean()*-Math.log(-x+1));
             }else{
-                this.serviceTime=clock+i.getSampleMean2()*-Math.log(-x+1);
+                this.serviceTime=clock+(i.getSampleMean2()*-Math.log(-x+1));
             }
-            System.out.println("Creating event for Inspector"+i.getId()+" time of completion: "+serviceTime);
+            System.out.println("Creating event for Inspector "+i.getId()+" time of completion: "+serviceTime);
         }else if(this.entity instanceof WorkStation){
             WorkStation w=(WorkStation)entity;
             if(w.getId()==1){
@@ -48,6 +48,9 @@ public class SimEvent implements Comparable<SimEvent>{
             }else{
                 this.type=EVENT.W3;
             }
+            this.serviceTime=clock+(w.getSampleMean()*-Math.log(-x+1));
+
+            System.out.println("Creating event for Workstation "+w.getId()+" time of completion: "+serviceTime);
         }
     }
     public EVENT getType() {
@@ -58,6 +61,9 @@ public class SimEvent implements Comparable<SimEvent>{
         return entity;
     }
 
+    public Inspector.COMPONENT_TYPE getComponent() {
+        return component;
+    }
     public double getTime() {
         return serviceTime;
     }
