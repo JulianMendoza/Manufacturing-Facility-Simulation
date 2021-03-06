@@ -5,10 +5,12 @@ public class WorkStation {
     private int id;
     private boolean[][] buffers;
     private double sampleMean,completionTime;
+    private boolean isBusy;
     public WorkStation(int id,double mean) {
         this.id = id;
         this.sampleMean=mean;
         buffers= new boolean[][]{{true,true},{true,true}};
+        this.isBusy=false;
     }
 
     public void setId(int id) {
@@ -19,8 +21,11 @@ public class WorkStation {
         return id;
     }
 
+    public boolean bufferAvailable(int buffer,int index){
+        return buffers[buffer][index];
+    }
     public boolean bufferAvailable(int buffer){
-        return buffers[buffer][0]||buffers[buffer][1];
+        return buffers[buffer][0]&&buffers[buffer][1];
     }
 
     /**
@@ -42,11 +47,24 @@ public class WorkStation {
         }
         return count;
     }
-
+    public boolean isBusy(){
+        return isBusy;
+    }
+    public void setBusy(boolean b){
+        this.isBusy=b;
+    }
     public double getCompletionTime() {
         return completionTime;
     }
     public double getSampleMean() {
         return sampleMean;
+    }
+    @Override
+    public String toString(){
+        if(id==1){
+            return "Is busy: "+isBusy +"\nBuffer 0 ["+buffers[0][0]+","+buffers[0][1]+"]";
+        }else{
+            return "Is busy: "+isBusy +"\nBuffer 0 ["+buffers[0][0]+","+buffers[0][1]+"]\n"+"Buffer 1 ["+buffers[1][0]+","+buffers[1][1]+"]";
+        }
     }
 }

@@ -32,7 +32,7 @@ public class SimEvent implements Comparable<SimEvent>{
             }else{
                 this.type = EVENT.I2;
             }
-            component=i.getComponent();
+            component=i.generateComponent();
             if(component.equals(Inspector.COMPONENT_TYPE.C1)||component.equals(Inspector.COMPONENT_TYPE.C2)){
                 this.serviceTime=clock+(i.getSampleMean()*-Math.log(-x+1));
             }else{

@@ -11,7 +11,6 @@ public class SimModel {
     public static final long SEED=111;
     // Statistics and important information
     private int P1,P2,P3;
-    private double[] productionTime;
     private double I1Busy,I2Busy;
     private final double I1Mean=10.3579;
     private final double I22Mean=15.5369;
@@ -24,6 +23,7 @@ public class SimModel {
         init(lifeCycle);
     }
     private void init(double lifeCycle){
+        System.out.println("CLOCK:"+clock);
         this.lifeCycle=lifeCycle;
         random=new Random();
         random.setSeed(SEED);
@@ -38,7 +38,6 @@ public class SimModel {
         FEL=new PriorityQueue<>();
         FEL.add(new SimEvent(I1,clock,random.nextDouble()));
         FEL.add(new SimEvent(I2,clock,random.nextDouble()));
-        productionTime=new double[3];
     }
 
     /**
@@ -58,98 +57,129 @@ public class SimModel {
                    processProduction(e);
                    break;
            }
+           printState();
        }
+    }
+    private void printState(){
+        System.out.println("Inspector 1 blocked status: "+ I1.isBlocked());
+        System.out.println("Inspector 2 blocked status: "+ I2.isBlocked());
+        System.out.println("WorkStation 1:\n"+W1);
+        System.out.println("WorkStation 2:\n"+W2);
+        System.out.println("WorkStation 3:\n"+W3);
+
     }
     /**
      * This method handles inspector event
      * @param event
      */
     private void processInspection1(SimEvent event){
-        double temp=clock;
-        //get the workstation with the smallest amount of available buffers
+        //get the workstation with the greatest amount of available buffers
         WorkStation w=getPriority(0);
         if(w!=null){
             w.setBufferAvailable(0,false);
             System.out.println("Placing C1 buffer into Workstation "+w.getId());
         }else{
-            System.out.println("BLOCKED");
-            //blocked
-            //compute which workstation will be done first -> add
-            //double closestFinish=Math.min(productionTime[0],Math.min(productionTime[1],productionTime[2]));
-            //temp=closestFinish;
+            System.out.println("I1 BLOCKED");
+            I1.setBlocked(true,clock);
         }
         handleChanges();
-        FEL.add(new SimEvent(I1,temp,random.nextDouble()));
+        if(!I1.isBlocked()) {
+            FEL.add(new SimEvent(I1, clock, random.nextDouble()));
+        }
     }
     private WorkStation getPriority(int index){
         int temp=W1.getNumAvail(index);
         int temp2=W2.getNumAvail(index);
         int temp3=W3.getNumAvail(index);
+        //priority is based off of whether or not a workstation is busy THEN the buffers THEN the PRIORITY.
+        if(!W1.isBusy()){
+            return W1;
+        }else if(!W2.isBusy()){
+            return W2;
+        }else if(!W3.isBusy()){
+            return W3;
+        }
+        //all full
         if(temp==temp2&&temp==temp3&&temp==0){
             return null;
-        }else if (temp<temp2&&temp<temp3||temp==temp2&&temp==temp3) {
-            return W1;
-        }else if(temp2<temp&&temp2<temp3||temp2==temp3){
+        }else if (temp>temp2&&temp>temp3||temp==temp2&&temp==temp3) {
+                return W1;
+        }else if(temp2>temp&&temp2>temp3||temp2==temp3){
             return W2;
-        }else if(temp3<temp&&temp3<temp2){
+        }else if(temp3>temp&&temp3>temp2){
             return W3;
-        }else{
-            System.out.println("Should not even get here");
-            return null;
         }
+        return null;
 
     }
     private void handleChanges(){
-        if(!W1.bufferAvailable(0)){
+        if(!W1.bufferAvailable(0)&&!W1.isBusy()){
             System.out.println("Removing buffer from Workstation 1");
             W1.setBufferAvailable(0,true);
+            W1.setBusy(true);
             SimEvent e=new SimEvent(W1,clock,random.nextDouble());
             FEL.add(e);
-            productionTime[0]=e.getTime();
-        }else if(!W2.bufferAvailable(0)&&!W2.bufferAvailable(1)){
+        }
+        if(!W2.bufferAvailable(0)&&!W2.bufferAvailable(1)&&!W2.isBusy()){
             System.out.println("Removing buffers C1 and C2 from Workstation 2");
+            if(I2.isBlocked()&&I2.getComponent().equals(Inspector.COMPONENT_TYPE.C2)){
+                System.out.println("Inspector 2 UNBLOCKED with C2");
+                I2.setBlocked(false,-1);
+                FEL.add(new SimEvent(I2,clock, random.nextDouble()));
+            }else if(I1.isBlocked()){
+                System.out.println("I1 UNBLOCKED");
+                I1.setBlocked(false,-1);
+                FEL.add(new SimEvent(I1,clock,random.nextDouble()));
+            }
             W2.setBufferAvailable(0,true);
             W2.setBufferAvailable(1,true);
+            W2.setBusy(true);
             SimEvent e=new SimEvent(W2,clock,random.nextDouble());
             FEL.add(e);
-            productionTime[1]=e.getTime();
-        }else if(!W3.bufferAvailable(0)&&!W3.bufferAvailable(1)){
+        }
+        if(!W3.bufferAvailable(0)&&!W3.bufferAvailable(1)&&!W3.isBusy()){
+            if(I2.isBlocked()&&I2.getComponent().equals(Inspector.COMPONENT_TYPE.C3)){
+                System.out.println("Inspector 2 UNBLOCKED with C3");
+                I2.setBlocked(false,-1);
+                FEL.add(new SimEvent(I2,clock, random.nextDouble()));
+            }else if(I1.isBlocked()){
+                System.out.println("I1 UNBLOCKED");
+                I1.setBlocked(false,-1);
+                FEL.add(new SimEvent(I1,clock,random.nextDouble()));
+            }
             System.out.println("Removing buffers C1 and C3 from Workstation 3");
             W3.setBufferAvailable(0,true);
             W3.setBufferAvailable(1,true);
+            W3.setBusy(true);
             SimEvent e=new SimEvent(W3,clock,random.nextDouble());
             FEL.add(e);
-            productionTime[2]=e.getTime();
         }
     }
     private void processInspection2(SimEvent event){
-        double temp=clock;
         switch (event.getComponent()){
             case C2:
-                if(W2.bufferAvailable(1)){
+                if(W2.bufferAvailable(1,0)|| W2.bufferAvailable(1,1)){
                     System.out.println("Placing C2 buffer into Workstation 2");
                     W2.setBufferAvailable(1,false);
                 }else{
-                    System.out.println("BLOCKED");
-                    //block
-                    //double closestFinish=Math.min(productionTime[1],productionTime[2]);
-                   //temp=closestFinish;
+                    System.out.println("Inspector 2 BLOCKED with C2");
+                    I2.setBlocked(true,clock);
                 }
                 break;
             case C3:
-            if(W3.bufferAvailable(1)){
+            if(W3.bufferAvailable(1,0)||W3.bufferAvailable(1,1)){
                 System.out.println("Placing C3 buffer into Workstation 3");
                 W3.setBufferAvailable(1,false);
             }else{
-                System.out.println("BLOCKED");
-                //block
-                // double closestFinish=Math.min(productionTime[1],productionTime[2]);
-                // temp=closestFinish;
+                System.out.println("Inspector 2 BLOCKED with C3");
+                I2.setBlocked(true,clock);
             }
                 break;
         }
         handleChanges();
-        FEL.add(new SimEvent(I2,temp,random.nextDouble()));
+        if(!I2.isBlocked()) {
+            FEL.add(new SimEvent(I2, clock, random.nextDouble()));
+        }
     }
 
     /**
@@ -161,6 +191,7 @@ public class SimModel {
     private void processProduction(SimEvent event){
         WorkStation w=(WorkStation)event.getEntity();
         System.out.println("Workstation "+w.getId()+" finished production of product: "+w.getId()+" at time: "+event.getTime());
+        w.setBusy(false);
         handleChanges();
     }
 
@@ -171,7 +202,7 @@ public class SimModel {
 
     }
     public static void main(String[] args){
-        SimModel model=new SimModel(80);
+        SimModel model=new SimModel(1000);
         model.start();
         model.generateReport();
 
