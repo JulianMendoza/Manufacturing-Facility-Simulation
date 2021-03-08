@@ -2,25 +2,13 @@ package simulation;
 
 
 public class SimEvent implements Comparable<SimEvent>{
-    @Override
-    //probably need margin of error
-    public int compareTo(SimEvent o) {
-        if(serviceTime>o.getTime()){
-            return 1;
-        }else if(serviceTime<o.getTime()){
-            return -1;
-        }else{
-            return 0;
-        }
-    }
-
     public enum EVENT {I1, I2, W1,W2,W3};
     private Object entity;
     private EVENT type;
     private double serviceTime;
+    private double duration;
     private Inspector.COMPONENT_TYPE component;
     public SimEvent(Object entity,double clock,double x){
-
         this.entity=entity;
         create(clock,x);
     }
@@ -34,9 +22,9 @@ public class SimEvent implements Comparable<SimEvent>{
             }
             component=i.generateComponent();
             if(component.equals(Inspector.COMPONENT_TYPE.C1)||component.equals(Inspector.COMPONENT_TYPE.C2)){
-                this.serviceTime=clock+(i.getSampleMean()*-Math.log(-x+1));
+                this.duration=(i.getSampleMean()*-Math.log(-x+1));
             }else{
-                this.serviceTime=clock+(i.getSampleMean2()*-Math.log(-x+1));
+                this.duration=(i.getSampleMean2()*-Math.log(-x+1));
             }
             System.out.println("Creating event for Inspector "+i.getId()+" time of completion: "+serviceTime);
         }else if(this.entity instanceof WorkStation){
@@ -48,24 +36,36 @@ public class SimEvent implements Comparable<SimEvent>{
             }else{
                 this.type=EVENT.W3;
             }
-            this.serviceTime=clock+(w.getSampleMean()*-Math.log(-x+1));
+            this.duration=(w.getSampleMean()*-Math.log(-x+1));
 
             System.out.println("Creating event for Workstation "+w.getId()+" time of completion: "+serviceTime);
         }
+        this.serviceTime=clock+this.duration;
     }
     public EVENT getType() {
         return type;
     }
-
     public Object getEntity() {
         return entity;
     }
-
     public Inspector.COMPONENT_TYPE getComponent() {
         return component;
     }
     public double getTime() {
         return serviceTime;
     }
-
+    public double getduration() {
+        return duration;
+    }
+    @Override
+    //probably need margin of error
+    public int compareTo(SimEvent o) {
+        if(serviceTime>o.getTime()){
+            return 1;
+        }else if(serviceTime<o.getTime()){
+            return -1;
+        }else{
+            return 0;
+        }
+    }
 }

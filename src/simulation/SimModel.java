@@ -2,6 +2,9 @@ package simulation;
 
 import java.util.*;
 
+/**
+ * Driving unit for the simulation
+ */
 public class SimModel {
     private double clock,lifeCycle;
     private Random random;
@@ -11,7 +14,7 @@ public class SimModel {
     public static final long SEED=111;
     // Statistics and important information
     private int P1,P2,P3;
-    private double I1Busy,I2Busy;
+    private double I1Busy,I2Busy,I1Blocked,I2Blocked,W1Busy,W2Busy,W3Busy;
     private final double I1Mean=10.3579;
     private final double I22Mean=15.5369;
     private final double I23Mean=20.6327;
@@ -22,26 +25,30 @@ public class SimModel {
     public SimModel(double lifeCycle){
         init(lifeCycle);
     }
+
+    /**
+     * Initializes the simulation
+     * @param lifeCycle
+     */
     private void init(double lifeCycle){
         System.out.println("CLOCK:"+clock);
         this.lifeCycle=lifeCycle;
         random=new Random();
         random.setSeed(SEED);
-        clock=0;
+        clock=I1Busy=I2Busy=I1Blocked=I2Blocked=W1Busy=W2Busy=W3Busy=0;
+        P1=P2=P3=0;
         I1 = new Inspector(1,I1Mean);
         I2 = new Inspector(2,I22Mean,I23Mean);
         W1 = new WorkStation(1,W1Mean);
         W2 = new WorkStation(2,W2Mean);
         W3 = new WorkStation(3,W3Mean);
-        I1Busy=0;
-        I2Busy=0;
         FEL=new PriorityQueue<>();
         FEL.add(new SimEvent(I1,clock,random.nextDouble()));
         FEL.add(new SimEvent(I2,clock,random.nextDouble()));
     }
 
     /**
-     *  Method to start the simulation event
+     *  Starts the simulation
      */
     private void start(){
        while(clock<=lifeCycle &&!(FEL.isEmpty())){
@@ -60,20 +67,25 @@ public class SimModel {
            printState();
        }
     }
+
+    /**
+     * Helper method to print the state of the simulation
+     */
     private void printState(){
         System.out.println("Inspector 1 blocked status: "+ I1.isBlocked());
         System.out.println("Inspector 2 blocked status: "+ I2.isBlocked());
         System.out.println("WorkStation 1:\n"+W1);
         System.out.println("WorkStation 2:\n"+W2);
         System.out.println("WorkStation 3:\n"+W3);
-
     }
+
     /**
-     * This method handles inspector event
+     * Handles events that involve inspector 1
      * @param event
      */
     private void processInspection1(SimEvent event){
         //get the workstation with the greatest amount of available buffers
+        I1Busy+= event.getduration();
         WorkStation w=getPriority(0);
         if(w!=null){
             w.setBufferAvailable(0,false);
@@ -87,6 +99,12 @@ public class SimModel {
             FEL.add(new SimEvent(I1, clock, random.nextDouble()));
         }
     }
+
+    /**
+     * Helper method to get the workstation with the highest priority
+     * @param index the component that's going to be transfered
+     * @return null if there is no station, the corresponding workstation otherwise
+     */
     private WorkStation getPriority(int index){
         int temp=W1.getNumAvail(index);
         int temp2=W2.getNumAvail(index);
@@ -112,6 +130,11 @@ public class SimModel {
         return null;
 
     }
+
+    /**
+     * Helper method to handle changes to the state of the workstations.
+     * Checks the buffers
+     */
     private void handleChanges(){
         if(!W1.bufferAvailable(0)&&!W1.isBusy()){
             System.out.println("Removing buffer from Workstation 1");
@@ -124,10 +147,12 @@ public class SimModel {
             System.out.println("Removing buffers C1 and C2 from Workstation 2");
             if(I2.isBlocked()&&I2.getComponent().equals(Inspector.COMPONENT_TYPE.C2)){
                 System.out.println("Inspector 2 UNBLOCKED with C2");
+                I2Blocked+=clock-I2.getBlockedTime();
                 I2.setBlocked(false,-1);
                 FEL.add(new SimEvent(I2,clock, random.nextDouble()));
             }else if(I1.isBlocked()){
                 System.out.println("I1 UNBLOCKED");
+                I1Blocked+=clock-I1.getBlockedTime();
                 I1.setBlocked(false,-1);
                 FEL.add(new SimEvent(I1,clock,random.nextDouble()));
             }
@@ -140,10 +165,12 @@ public class SimModel {
         if(!W3.bufferAvailable(0)&&!W3.bufferAvailable(1)&&!W3.isBusy()){
             if(I2.isBlocked()&&I2.getComponent().equals(Inspector.COMPONENT_TYPE.C3)){
                 System.out.println("Inspector 2 UNBLOCKED with C3");
+                I2Blocked+=clock-I2.getBlockedTime();
                 I2.setBlocked(false,-1);
                 FEL.add(new SimEvent(I2,clock, random.nextDouble()));
             }else if(I1.isBlocked()){
                 System.out.println("I1 UNBLOCKED");
+                I1Blocked+=clock-I1.getBlockedTime();
                 I1.setBlocked(false,-1);
                 FEL.add(new SimEvent(I1,clock,random.nextDouble()));
             }
@@ -155,7 +182,13 @@ public class SimModel {
             FEL.add(e);
         }
     }
+
+    /**
+     * Handles events that involve inspector 2
+     * @param event
+     */
     private void processInspection2(SimEvent event){
+        I2Busy+= event.getduration();
         switch (event.getComponent()){
             case C2:
                 if(W2.bufferAvailable(1,0)|| W2.bufferAvailable(1,1)){
@@ -183,14 +216,18 @@ public class SimModel {
     }
 
     /**
-     * this method increments the product number
-     *  checks for component and
-     *  buffer availability
+     *  Increments the product that finished production
+     *  call to handleChanges will simulate that the buffers have changed
      * @param event
      */
     private void processProduction(SimEvent event){
         WorkStation w=(WorkStation)event.getEntity();
         System.out.println("Workstation "+w.getId()+" finished production of product: "+w.getId()+" at time: "+event.getTime());
+        switch(w.getId()){
+            case 1: P1++;break;
+            case 2: P2++;break;
+            case 3: P3++;break;
+        }
         w.setBusy(false);
         handleChanges();
     }
@@ -199,7 +236,19 @@ public class SimModel {
      * Computes statistics for throughput...etc
      */
     private void generateReport(){
-
+        if(I1.isBlocked()){
+            I1Blocked+=clock-I1.getBlockedTime();
+        }
+        if(I2.isBlocked()){
+            I2Blocked+=clock-I2.getBlockedTime();
+        }
+        System.out.println("Product 1 tally: "+P1+" throughput: "+P1/clock+" units/unit time");
+        System.out.println("Product 2 tally: "+P2+" throughput: "+P2/clock+" units/unit time");
+        System.out.println("Product 3 tally: "+P3+" throughput: "+P3/clock+" units/unit time");
+        System.out.println("Utilization Inspector 1: "+(I1Busy/clock)*100+"%");
+        System.out.println("Utilization Inspector 2: "+(I2Busy/clock)*100+"%");
+        System.out.println("Percentage blocked Inspector 1: "+(I1Blocked/clock)*100+"%");
+        System.out.println("Percentage blocked Inspector 2: "+(I2Blocked/clock)*100+"%");
     }
     public static void main(String[] args){
         SimModel model=new SimModel(1000);

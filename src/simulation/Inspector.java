@@ -29,10 +29,6 @@ public class Inspector {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public COMPONENT_TYPE generateComponent() {
         if(this.id==1){
             this.component=COMPONENT_TYPE.C1;
@@ -48,8 +44,6 @@ public class Inspector {
     public COMPONENT_TYPE getComponent(){
         return this.component;
     }
-
-
 
     public boolean isBlocked() {
         return isBlocked;

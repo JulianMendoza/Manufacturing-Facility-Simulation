@@ -4,17 +4,13 @@ public class WorkStation {
 
     private int id;
     private boolean[][] buffers;
-    private double sampleMean,completionTime;
+    private double sampleMean;
     private boolean isBusy;
     public WorkStation(int id,double mean) {
         this.id = id;
         this.sampleMean=mean;
         buffers= new boolean[][]{{true,true},{true,true}};
         this.isBusy=false;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public int getId() {
@@ -52,9 +48,6 @@ public class WorkStation {
     }
     public void setBusy(boolean b){
         this.isBusy=b;
-    }
-    public double getCompletionTime() {
-        return completionTime;
     }
     public double getSampleMean() {
         return sampleMean;
