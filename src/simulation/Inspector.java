@@ -1,10 +1,10 @@
 package simulation;
 
+import util.COMPONENT_TYPE;
+
 import java.util.Random;
 
 public class Inspector {
-
-    public enum COMPONENT_TYPE {C1, C2, C3}
 
     private int id;
     private boolean isBlocked = false;

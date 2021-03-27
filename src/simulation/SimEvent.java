@@ -1,13 +1,15 @@
 package simulation;
 
 
+import util.COMPONENT_TYPE;
+import util.EVENT;
+
 public class SimEvent implements Comparable<SimEvent>{
-    public enum EVENT {I1, I2, W1,W2,W3};
     private Object entity;
     private EVENT type;
     private double serviceTime;
     private double duration;
-    private Inspector.COMPONENT_TYPE component;
+    private COMPONENT_TYPE component;
     public SimEvent(Object entity,double clock,double x){
         this.entity=entity;
         create(clock,x);
@@ -21,7 +23,7 @@ public class SimEvent implements Comparable<SimEvent>{
                 this.type = EVENT.I2;
             }
             component=i.generateComponent();
-            if(component.equals(Inspector.COMPONENT_TYPE.C1)||component.equals(Inspector.COMPONENT_TYPE.C2)){
+            if(component.equals(COMPONENT_TYPE.C1)||component.equals(COMPONENT_TYPE.C2)){
                 this.duration=(i.getSampleMean()*-Math.log(-x+1));
             }else{
                 this.duration=(i.getSampleMean2()*-Math.log(-x+1));
@@ -48,7 +50,7 @@ public class SimEvent implements Comparable<SimEvent>{
     public Object getEntity() {
         return entity;
     }
-    public Inspector.COMPONENT_TYPE getComponent() {
+    public COMPONENT_TYPE getComponent() {
         return component;
     }
     public double getTime() {

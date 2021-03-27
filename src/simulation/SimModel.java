@@ -1,5 +1,7 @@
 package simulation;
 
+import util.COMPONENT_TYPE;
+
 import java.util.*;
 
 /**
@@ -85,11 +87,11 @@ public class SimModel {
      */
     private void processInspection1(SimEvent event){
         //get the workstation with the greatest amount of available buffers
-        I1Busy+= event.getduration();
         WorkStation w=getPriority(0);
         if(w!=null){
             w.setBufferAvailable(0,false);
             System.out.println("Placing C1 buffer into Workstation "+w.getId());
+            I1Busy+= event.getduration();
         }else{
             System.out.println("I1 BLOCKED");
             I1.setBlocked(true,clock);
@@ -145,7 +147,7 @@ public class SimModel {
         }
         if(!W2.bufferAvailable(0)&&!W2.bufferAvailable(1)&&!W2.isBusy()){
             System.out.println("Removing buffers C1 and C2 from Workstation 2");
-            if(I2.isBlocked()&&I2.getComponent().equals(Inspector.COMPONENT_TYPE.C2)){
+            if(I2.isBlocked()&&I2.getComponent().equals(COMPONENT_TYPE.C2)){
                 System.out.println("Inspector 2 UNBLOCKED with C2");
                 I2Blocked+=clock-I2.getBlockedTime();
                 I2.setBlocked(false,-1);
@@ -163,7 +165,7 @@ public class SimModel {
             FEL.add(e);
         }
         if(!W3.bufferAvailable(0)&&!W3.bufferAvailable(1)&&!W3.isBusy()){
-            if(I2.isBlocked()&&I2.getComponent().equals(Inspector.COMPONENT_TYPE.C3)){
+            if(I2.isBlocked()&&I2.getComponent().equals(COMPONENT_TYPE.C3)){
                 System.out.println("Inspector 2 UNBLOCKED with C3");
                 I2Blocked+=clock-I2.getBlockedTime();
                 I2.setBlocked(false,-1);
@@ -188,11 +190,12 @@ public class SimModel {
      * @param event
      */
     private void processInspection2(SimEvent event){
-        I2Busy+= event.getduration();
         switch (event.getComponent()){
             case C2:
                 if(W2.bufferAvailable(1,0)|| W2.bufferAvailable(1,1)){
                     System.out.println("Placing C2 buffer into Workstation 2");
+                    I2Busy+= event.getduration();
+
                     W2.setBufferAvailable(1,false);
                 }else{
                     System.out.println("Inspector 2 BLOCKED with C2");
@@ -202,6 +205,7 @@ public class SimModel {
             case C3:
             if(W3.bufferAvailable(1,0)||W3.bufferAvailable(1,1)){
                 System.out.println("Placing C3 buffer into Workstation 3");
+                I2Busy+= event.getduration();
                 W3.setBufferAvailable(1,false);
             }else{
                 System.out.println("Inspector 2 BLOCKED with C3");
