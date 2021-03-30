@@ -28,6 +28,7 @@ public class SimEvent implements Comparable<SimEvent>{
             }else{
                 this.duration=(i.getSampleMean2()*-Math.log(-x+1));
             }
+            this.serviceTime=clock+this.duration;
             System.out.println("Creating event for Inspector "+i.getId()+" time of completion: "+serviceTime);
         }else if(this.entity instanceof WorkStation){
             WorkStation w=(WorkStation)entity;
@@ -39,10 +40,9 @@ public class SimEvent implements Comparable<SimEvent>{
                 this.type=EVENT.W3;
             }
             this.duration=(w.getSampleMean()*-Math.log(-x+1));
-
+            this.serviceTime=clock+this.duration;
             System.out.println("Creating event for Workstation "+w.getId()+" time of completion: "+serviceTime);
         }
-        this.serviceTime=clock+this.duration;
     }
     public EVENT getType() {
         return type;
@@ -56,7 +56,7 @@ public class SimEvent implements Comparable<SimEvent>{
     public double getTime() {
         return serviceTime;
     }
-    public double getduration() {
+    public double getDuration() {
         return duration;
     }
     @Override

@@ -20,7 +20,7 @@ public class Inspector {
         this.sampleMean1=mean;
         this.sampleMean2=mean2;
         this.random=new Random();
-        this.random.setSeed(SimModel.SEED);
+        this.random.setSeed(SimModel.SEEDS[6]);
         this.blockedTime=-1;
 
     }
