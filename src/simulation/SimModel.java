@@ -1,6 +1,7 @@
 package simulation;
 
 import util.COMPONENT_TYPE;
+import util.CSVFile;
 
 import java.util.*;
 
@@ -8,6 +9,7 @@ import java.util.*;
  * Driving unit for the simulation
  */
 public class SimModel {
+    private CSVFile file;
     private double clock,lifeCycle;
     private Random[] random; //index 0-5 for I1,I22,I23,W1,W2,W3 respectively
     private Queue<SimEvent> FEL;
@@ -27,6 +29,7 @@ public class SimModel {
 
     public SimModel(double lifeCycle){
         random=new Random[6];
+        file=new CSVFile("testSim.csv");
         init(lifeCycle);
     }
 
@@ -60,29 +63,62 @@ public class SimModel {
        while(clock<=lifeCycle &&!(FEL.isEmpty())){
            SimEvent e=FEL.remove();
            clock=e.getTime();
+           int w=0;
            System.out.println("CLOCK:"+clock);
            switch(e.getType()){
                case I1: processInspection1(e); break;
                case I2: processInspection2(e); break;
-               case W1:
-               case W2:
-               case W3:
+               case W1:w=1; processProduction(e);break;
+               case W2:w=2; processProduction(e);break;
+               case W3:w=3;
                    processProduction(e);
                    break;
            }
-           printState();
+           printState(w);
        }
+       file.close();
     }
 
     /**
      * Helper method to print the state of the simulation
      */
-    private void printState(){
+    private void printState(int w){
         System.out.println("Inspector 1 blocked status: "+ I1.isBlocked());
         System.out.println("Inspector 2 blocked status: "+ I2.isBlocked());
         System.out.println("WorkStation 1:\n"+W1);
         System.out.println("WorkStation 2:\n"+W2);
         System.out.println("WorkStation 3:\n"+W3);
+        StringBuilder sb=new StringBuilder();
+        sb.append(clock+",");
+        sb.append((I1.isBlocked()?0:1)+",");
+        sb.append((I2.isBlocked()?0:1)+",");
+        sb.append((W1.isBusy()?1:0)+",");
+        sb.append(W1.getNumAvail(0)+",");
+        sb.append((W2.isBusy()?1:0)+",");
+        sb.append(W2.getNumAvail(0)+",");
+        sb.append(W2.getNumAvail(1)+",");
+        sb.append((W3.isBusy()?1:0)+",");
+        sb.append(W3.getNumAvail(0)+",");
+        sb.append(W3.getNumAvail(1)+",");
+        if(w==0) {
+            sb.append(0 + ",");
+            sb.append(0 + ",");
+            sb.append(0 + ",\n");
+        }else if(w==1){
+            sb.append(1 + ",");
+            sb.append(0 + ",");
+            sb.append(0 + ",\n");
+        }else if(w==2){
+            sb.append(0 + ",");
+            sb.append(1 + ",");
+            sb.append(0 + ",\n");
+        }else{
+            sb.append(0 + ",");
+            sb.append(0 + ",");
+            sb.append(1 + ",\n");
+        }
+        System.out.println(sb.toString());
+        file.write(sb.toString());
     }
 
     /**
