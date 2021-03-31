@@ -260,7 +260,7 @@ public class SimModel {
         System.out.println("Percentage blocked Inspector 2: "+(I2Blocked/clock)*100+"%");
     }
     public static void main(String[] args){
-        SimModel model=new SimModel(100000);
+        SimModel model=new SimModel(3000);
         model.start();
         model.generateReport();
     }
