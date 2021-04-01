@@ -12,15 +12,15 @@ public class Inspector {
     private Random random;
     private COMPONENT_TYPE component;
     private double blockedTime;
-    public Inspector(int id,double mean){
-        this(id,mean,0);
+    public Inspector(int id,double mean,long seed){
+        this(id,mean,0,seed);
     }
-    public Inspector(int id,double mean,double mean2){
+    public Inspector(int id,double mean,double mean2,long seed){
         this.id=id;
         this.sampleMean1=mean;
         this.sampleMean2=mean2;
         this.random=new Random();
-        this.random.setSeed(SimModel.SEEDS[6]);
+        this.random.setSeed(seed);
         this.blockedTime=-1;
 
     }
