@@ -341,23 +341,20 @@ public class SimModel {
     }
 
     public static void main(String[] args) {
-        /**
-         * THIS CODE IS ABSOLUTE DOG DONT JUDGE
-         */
-        double []tTable= new double[]{12.71,4.30,3.18,2.78,2.57,2.45,2.36,2.31,2.26,2.23,2.20,2.18,2.16,2.14,2.13,2.12,2.11,2.10,2.09,2.09,2.08,2.07,2.06,2.06,2.06,2.05,2.05,2.04,2.04,2.02,2.02,2.02,2.02,2.02,2.02,2.02,2.02,2.02,2.02,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-        List<List<Double>> replications=new ArrayList();
+
+        List<List<Double>> replications=new ArrayList(); //replications will contain the statistics of each replication index  -> run # ->list-> statistics
         CSVFile file=new CSVFile("SimulationReplications.csv");
         long seed=11;
         long seedIncr=7;
         int numReplications=80;
         int numTrials=0;
+        ArrayList<Double> tTable=getTtable(numReplications);
         outerloop:
         for(int i=0;i<numReplications;i++){
-            System.out.println(seed);
-            double []average=new double[11];
+            double []average=new double[11]; //contain the running average mean of the simulation runs
             SimModel model = new SimModel(1500,seed,i,file);
             model.start();
-            Double[] averageDoubleObj=new Double[11];
+            Double[] averageDoubleObj=new Double[11]; //Wrapper so that each simulation run can be appended to the dataStructure
             double []temp=model.generateReport();
             for(int j=0;j<averageDoubleObj.length;j++){
                 averageDoubleObj[j]=Double.valueOf(temp[j]);
@@ -365,11 +362,11 @@ public class SimModel {
             replications.add(Arrays.asList(averageDoubleObj));
             for(int k=0;k<replications.size();k++){
                 for(int j=0;j<averageDoubleObj.length;j++){
-                    average[j]+=replications.get(k).get(j);
+                    average[j]+=replications.get(k).get(j); //summation
                 }
             }
             for(int k=0;k<average.length;k++){
-                average[k]=average[k]/replications.size();
+                average[k]=average[k]/replications.size(); //average
             }
             double []sumYiminusYbarSquared=new double[11];
             for(int k=0;k<replications.size();k++){
@@ -378,32 +375,42 @@ public class SimModel {
                 }
             }
             int count=0;
-            if(i>=4&&i<80) {
+            if(i>=4&&i<80) { //5 simulation threshold 80 simulation upperbound
                 for (int j = 0; j < average.length; j++) {
                     count++;
-                    if(j==7) {
+                    if(j==7) { //this is the blocked percentage of the simulation run, causes problems for the given scheduler since it rarely blocks
                         count++;
                     }else {
                         double variance = sumYiminusYbarSquared[j] / (i + 1);
-                        double error = tTable[i] * ((Math.sqrt(variance)) / Math.sqrt(i + 1)) * 2;
-                        System.out.println("ERROR: " + error);
-                        System.out.println("20% Width: " + average[j] * 0.2);
+                        double error = tTable.get(i) * ((Math.sqrt(variance)) / Math.sqrt(i + 1)) * 2;
                         if (average[j] * 0.2 < (error)) {
                             break;
                         }
                     }
-                    System.out.println(count);
                     if(count==9){
-                        numTrials=i;
                         break outerloop;
                     }
                 }
             }
             seed+=seedIncr;
         }
-        System.out.println(numTrials);
         file.close();
-
+    }
+    public static ArrayList<Double> getTtable(int replications){
+        ArrayList<Double> tTable=new ArrayList<>(Arrays.asList(new Double[]{12.71,4.30,3.18,2.78,2.57,2.45,2.36,2.31,2.26,2.23,2.20,2.18,2.16,2.14,2.13,2.12,2.11,2.10,2.09,2.09,2.08,2.07,2.06,2.06,2.06,2.05,2.05,2.04}));
+        for(int i=0;i<10;i++){
+            tTable.add(2.04);
+        }
+        for(int i=0;i<20;i++){
+            tTable.add(2.02);
+        }
+        for(int i=0;i<60;i++){
+            tTable.add(2.0);
+        }
+        for(int i=0;i<replications;i++){
+            tTable.add(1.98);
+        }
+        return tTable;
     }
 }
 
