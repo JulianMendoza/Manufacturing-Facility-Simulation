@@ -25,15 +25,10 @@ public class Helper {
         return tTable;
     }
 
-    public static void setUp(int seedBound, int seedIncBound, int lowerThreshold, int numReplications, boolean optimized) {
+    public static void setUp(int seedBound, int seedIncBound, int lowerThreshold, int numReplications,int lifeCycle,String fileName, boolean optimized) {
         Random random = new Random();
         List<List<Double>> replications = new ArrayList(); //replications will contain the statistics of each replication index  -> run # ->list-> statistics
-        CSVFile file;
-        if (optimized) {
-            file = new CSVFile("SimulationReplicationsOptimized.csv");
-        } else {
-            file = new CSVFile("SimulationReplications.csv");
-        }
+        CSVFile file =new CSVFile(fileName);
         long seed = random.nextInt(seedBound) + 1;
         long seedIncr = random.nextInt(seedIncBound) + 1;
         int numTrials = 0;
@@ -41,7 +36,7 @@ public class Helper {
         outerLoop:
         for (int i = 0; i < numReplications; i++) {
             double[] average = new double[11]; //contain the running average mean of the simulation runs
-            SimModel model = new SimModel(3000, seed, i, file, optimized);
+            SimModel model = new SimModel(lifeCycle, seed, i, file, optimized);
             model.start();
             Double[] averageDoubleObj = new Double[11]; //Wrapper so that each simulation run can be appended to the dataStructure
             double[] temp = model.generateReport();

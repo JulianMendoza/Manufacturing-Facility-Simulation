@@ -93,7 +93,7 @@ public class SimModel {
                     processProduction(e);
                     break;
             }
-            //printState(w);
+            printState(w);
         }
     }
 
@@ -135,8 +135,6 @@ public class SimModel {
             sb.append(0 + ",");
             sb.append(1 + ",\n");
         }
-        System.out.println(sb.toString());
-        //file.write(sb.toString());
     }
 
     /**
@@ -176,21 +174,13 @@ public class SimModel {
         if (this.optimized) { //user  chooses the optimized scheduler
             if (temp == temp2 && temp == temp3 && temp3 == 0) {
                 return null;
-            } else if (temp3 >= temp && temp3 > temp2 || temp3 == temp2 && temp3 == temp) {
+            } else if (temp3 >= temp && temp3 >= temp2 || temp3 == temp2 && temp3 == temp) {
                 return W3;
             } else if (temp2 >= temp && temp2 > temp3 || temp2 == temp3) {
                 return W2;
             } else if (temp > temp3 && temp > temp2) {
                 return W1;
             }
-            if (!W3.isBusy()) {
-                return W3;
-            } else if (!W2.isBusy()) {
-                return W2;
-            } else if (!W1.isBusy()) {
-                return W1;
-            }
-            return null;
         } else {
             if (temp == temp2 && temp == temp3 && temp == 0) {
                 return null;
@@ -201,15 +191,8 @@ public class SimModel {
             } else if (temp3 > temp && temp3 > temp2) {
                 return W3;
             }
-            if (!W1.isBusy()) {
-                return W1;
-            } else if (!W2.isBusy()) {
-                return W2;
-            } else if (!W3.isBusy()) {
-                return W3;
-            }
-            return null;
         }
+        return null;
 
     }
 
@@ -225,7 +208,7 @@ public class SimModel {
             SimEvent e = new SimEvent(W1, clock, random[3].nextDouble());
             FEL.add(e);
             if (I1.isBlocked()) {
-                //System.out.println("I1 UNBLOCKED");
+                System.out.println("I1 UNBLOCKED");
                 I1Blocked += clock - I1.getBlockedTime();
                 I1.setBlocked(false, -1);
                 FEL.add(new SimEvent(I1, clock, random[0].nextDouble()));

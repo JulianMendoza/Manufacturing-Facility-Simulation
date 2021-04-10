@@ -60,7 +60,6 @@ public class SimEvent implements Comparable<SimEvent>{
         return duration;
     }
     @Override
-    //probably need margin of error
     public int compareTo(SimEvent o) {
         if(serviceTime>o.getTime()){
             return 1;
